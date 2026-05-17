@@ -13,7 +13,7 @@ class StudentPage:
         self.wait = WebDriverWait(driver, 10)
 
     # Locator of department filter
-    department_dropdown_filter = (By.XPATH, "//button[@role='combobox']//span[text()='Filter by department...']")
+    department_dropdown_filter = (By.XPATH, "//button[@role='combobox']")
     # Locator for all dropdown options
     dropdown_options = (
         By.XPATH,
@@ -25,23 +25,34 @@ class StudentPage:
         "//select"
     )
 
+    next_button = (
+        By.XPATH,
+        "//button[normalize-space()='Next']"
+    )
+
     def select_random_department_from_filter(self):
+
+        # Click department dropdown
         self.driver.find_element(*self.department_dropdown_filter).click()
-        # Get all dropdown options
-        options = self.driver.find_elements(*self.dropdown_options)
 
-        # Choose random option
-        random_option = random.choice(options)
+        time.sleep(1)
 
-        # Get visible text
-        option_text = random_option.text
+        # Get all department options
+        departments = self.driver.find_elements(*self.dropdown_options)
+        random_department = random.choice(departments)
 
-        # Click selected option
-        random_option.click()
+        selected_department = random_department.text
 
-        print(f"Randomly Selected Department: {option_text}")
 
-        return option_text
+        # Click using JavaScript (VERY IMPORTANT)
+        self.driver.execute_script(
+            "arguments[0].click();",
+            random_department
+        )
+
+        time.sleep(2)
+
+        return selected_department
 
     def select_page_size(self, page_size):
 
@@ -58,4 +69,65 @@ class StudentPage:
         select.select_by_visible_text(str(page_size))
 
         print(f"Selected Page Size: {page_size}")
+        time.sleep(5)
+
+    def click_next_page(self):
+
+        # Find Next button
+        next_btn = self.driver.find_element(*self.next_button)
+
+        # Check if disabled
+        is_disabled = next_btn.get_attribute("disabled")
+
+        # If disabled
+        if is_disabled:
+            print("Next button is disabled")
+            return "disabled"
+
+        # Click button
+        next_btn.click()
+
+        print("Clicked Next button")
+
+        time.sleep(1)
+
+        return "clicked"
+
+    def get_table_data_as_dictionary(self):
+        """
+        Returns all table row data as list of dictionaries
+        """
+
+        table_data = []
+
+        # Get all rows
+        rows = self.driver.find_elements(
+            By.XPATH,
+            "//tbody/tr"
+        )
+
+        # Loop through each row
+        for row in rows:
+            # Get all td values except action buttons
+            columns = row.find_elements(By.XPATH, "./td")
+
+            row_data = {
+                "name": columns[0].text,
+                "email": columns[1].text,
+                "department": columns[2].text,
+                "student_id": columns[3].text,
+                "age": columns[4].text
+            }
+
+            table_data.append(row_data)
+
+        return table_data
+
+    def click_filter_button(self):
+
+        self.driver.find_element(
+            By.XPATH,
+            "//button[text()='Filter']"
+        ).click()
+
         time.sleep(2)

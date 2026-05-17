@@ -1,3 +1,5 @@
+import time
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -30,7 +32,9 @@ class LoginPage:
     def login(self, username, password):
         self.enter_username(username)
         self.enter_password(password)
+        time.sleep(5)
         self.click_login()
+
 
     # Validation Helper
     def is_login_successful(self):
